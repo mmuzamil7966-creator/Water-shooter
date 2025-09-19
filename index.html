@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Water Sort Puzzle - 80 Levels</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #fff;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 900px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(to right, #ff9966, #ff5e62);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 0 10px;
+        }
+
+        .level-info, .moves-info, .timer {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .tube {
+            width: 70px;
+            height: 180px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 0 0 30px 30px;
+            position: relative;
+            margin: 0 auto;
+            cursor: pointer;
+            box-shadow: 
+                0 10px 20px rgba(0, 0, 0, 0.2),
+                inset 0 -5px 15px rgba(0, 0, 0, 0.1);
+            transform-style: preserve-3d;
+            transform: rotateX(20deg);
+            transition: transform 0.3s ease;
+        }
+
+        .tube:hover {
+            transform: rotateX(20deg) translateY(-5px);
+        }
+
+        .tube.selected {
+            transform: rotateX(20deg) translateY(-10px);
+            box-shadow: 
+                0 15px 25px rgba(0, 0, 0, 0.3),
+                inset 0 -5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .tube.locked {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .tube.locked::before {
+            content: "🔒";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5rem;
+            z-index: 10;
+        }
+
+        .liquid {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            border-radius: 0 0 30px 30px;
+            transition: height 0.5s ease;
+        }
+
+        .liquid-top {
+            height: 20px;
+            filter: brightness(120%);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(to right, #ff9966, #ff5e62);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        .level-selector {
+            margin-top: 20px;
+        }
+
+        .level-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+            max-height: 150px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .level-btn {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .level-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .level-btn.active {
+            background: #ff5e62;
+            transform: scale(1.1);
+        }
+
+        .level-btn.completed {
+            background: #2ecc71;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .win-message {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        /* Difficulty indicators */
+        .difficulty {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-top: 5px;
+        }
+
+        .diff-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .diff-dot.filled {
+            background: #ff5e62;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .game-board {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .tube {
+                width: 60px;
+                height: 150px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .game-board {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            button {
+                width: 100%;
+                max-width: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Water Sort Puzzle</h1>
+        
+        <div class="game-info">
+            <div class="level-info">Level: <span id="level">1</span>/80</div>
+            <div class="moves-info">Moves: <span id="moves">0</span></div>
+            <div class="timer">Time: <span id="time">00:00</span></div>
+        </div>
+        
+        <div class="game-board" id="game-board">
+            <!-- Tubes will be generated here -->
+        </div>
+        
+        <div class="controls">
+            <button id="pause-btn">Pause</button>
+            <button id="reset-btn">Reset Level</button>
+            <button id="hint-btn">Hint</button>
+            <button id="next-level-btn" style="display: none;">Next Level</button>
+        </div>
+        
+        <div class="level-selector">
+            <h3>Select Level</h3>
+            <div class="level-buttons" id="level-buttons">
+                <!-- Level buttons will be generated here -->
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal" id="pause-modal">
+        <div class="modal-content">
+            <h2>Game Paused</h2>
+            <p>Take your time!</p>
+            <button id="resume-btn">Resume Game</button>
+        </div>
+    </div>
+    
+    <div class="modal" id="win-modal">
+        <div class="modal-content">
+            <h2 class="win-message">Level Complete!</h2>
+            <p>You finished in <span id="final-moves">0</span> moves</p>
+            <p>Time: <span id="final-time">00:00</span></p>
+            <button id="continue-btn">Continue</button>
+        </div>
+    </div>
+
+    <script>
+        // Game data for 80 levels with increasing difficulty
+        const levels = [];
+        
+        // Generate 80 levels with progressive difficulty
+        for (let i = 0; i < 80; i++) {
+            let tubes = [];
+            let colorsCount = 0;
+            let emptyTubes = 0;
+            let lockedTubes = 0;
+            
+            // Determine difficulty parameters based on level
+            if (i < 10) {
+                // Levels 1-10: Simple levels with 2-3 colors
+                colorsCount = 2 + Math.floor(i / 5);
+                emptyTubes = 1;
+                tubes = generateLevel(colorsCount, emptyTubes, 0, false);
+            } else if (i < 20) {
+                // Levels 11-20: Introduce more colors and empty tubes
+                colorsCount = 4 + Math.floor((i - 10) / 3);
+                emptyTubes = 2;
+                tubes = generateLevel(colorsCount, emptyTubes, 0, false);
+            } else if (i < 30) {
+                // Levels 21-30: Add complexity with uneven distribution
+                colorsCount = 5 + Math.floor((i - 20) / 2);
+                emptyTubes = 2;
+                tubes = generateLevel(colorsCount, emptyTubes, 0, true);
+            } else if (i < 40) {
+                // Levels 31-40: Introduce move constraints
+                colorsCount = 6 + Math.floor((i - 30) / 2);
+                emptyTubes = 2;
+                tubes = generateLevel(colorsCount, emptyTubes, 0, true);
+            } else if (i < 50) {
+                // Levels 41-50: Add partially pre-filled tubes
+                colorsCount = 7 + Math.floor((i - 40) / 2);
+                emptyTubes = 2;
+                tubes = generateLevel(colorsCount, emptyTubes, 0, true);
+            } else if (i < 60) {
+                // Levels 51-60: Introduce locked tubes
+                colorsCount = 8 + Math.floor((i - 50) / 2);
+                emptyTubes = 2;
+                lockedTubes = i < 55 ? 1 : 2;
+                tubes = generateLevel(colorsCount, emptyTubes, lockedTubes, true);
+            } else if (i < 70) {
+                // Levels 61-70: More complex patterns
+                colorsCount = 9 + Math.floor((i - 60) / 2);
+                emptyTubes = 3;
+                lockedTubes = 2;
+                tubes = generateLevel(colorsCount, emptyTubes, lockedTubes, true);
+            } else {
+                // Levels 71-80: Most challenging levels
+                colorsCount = 10 + Math.floor((i - 70) / 2);
+                emptyTubes = 3;
+                lockedTubes = 3;
+                tubes = generateLevel(colorsCount, emptyTubes, lockedTubes, true);
+            }
+            
+            levels.push({
+                tubes: tubes,
+                maxMoves: Math.floor(colorsCount * 8 * (1 - (emptyTubes / 10))),
+                timeLimit: i >= 30 ? Math.floor(colorsCount * 15 * (1 - (emptyTubes / 10))) : null
+            });
+        }
+        
+        // Helper function to generate a level configuration
+        function generateLevel(colorsCount, emptyTubes, lockedTubes, unevenDistribution) {
+            const totalTubes = colorsCount + emptyTubes + lockedTubes;
+            const tubes = [];
+            
+            // Create color array
+            const colors = [];
+            for (let i = 0; i < colorsCount; i++) {
+                colors.push(`color${i}`);
+            }
+            
+            // Create empty tubes
+            for (let i = 0; i < emptyTubes; i++) {
+                tubes.push(Array(4).fill('empty'));
+            }
+            
+            // Create locked tubes (initially empty)
+            for (let i = 0; i < lockedTubes; i++) {
+                tubes.push(Array(4).fill('empty'));
+            }
+            
+            // Create color tubes
+            for (let i = 0; i < colorsCount; i++) {
+                const color = colors[i];
+                
+                if (unevenDistribution && i < colorsCount - 1 && Math.random() > 0.5) {
+                    // Uneven distribution - some colors appear in multiple tubes
+                    const tube1 = Array(4).fill(color);
+                    const tube2 = Array(4).fill(color);
+                    tubes.push(tube1);
+                    tubes.push(tube2);
+                    i++; // Skip next color
+                } else {
+                    // Normal distribution
+                    tubes.push(Array(4).fill(color));
+                }
+            }
+            
+            // Shuffle the tubes
+            for (let i = tubes.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [tubes[i], tubes[j]] = [tubes[j], tubes[i]];
+            }
+            
+            // For locked tubes, mark them as locked
+            for (let i = 0; i < lockedTubes; i++) {
+                tubes[i].locked = true;
+            }
+            
+            return tubes;
+        }
+
+        // Initialize game variables
+        let currentLevel = 0;
+        let moves = 0;
+        let selectedTube = null;
+        let gamePaused = false;
+        let gameTimer = null;
+        let seconds = 0;
+        let completedLevels = new Set();
+        
+        // Color definitions
+        const colors = {
+            'color0': '#ff5e62',    // Red
+            'color1': '#3498db',    // Blue
+            'color2': '#2ecc71',    // Green
+            'color3': '#f1c40f',    // Yellow
+            'color4': '#9b59b6',    // Purple
+            'color5': '#e67e22',    // Orange
+            'color6': '#1abc9c',    // Turquoise
+            'color7': '#d35400',    // Pumpkin
+            'color8': '#c0392b',    // Dark Red
+            'color9': '#8e44ad',    // Dark Purple
+            'color10': '#f39c12',   // Dark Yellow
+            'color11': '#2980b9',   // Dark Blue
+            'empty': 'transparent'
+        };
+
+        // Initialize the game
+        function initGame() {
+            generateLevelButtons();
+            loadLevel(currentLevel);
+            setupEventListeners();
+            startTimer();
+        }
+
+        // Generate level selection buttons
+        function generateLevelButtons() {
+            const levelButtonsContainer = document.getElementById('level-buttons');
+            levelButtonsContainer.innerHTML = '';
+            
+            for (let i = 0; i < levels.length; i++) {
+                const button = document.createElement('div');
+                button.className = 'level-btn';
+                if (i === currentLevel) button.classList.add('active');
+                if (completedLevels.has(i)) button.classList.add('completed');
+                button.textContent = i + 1;
+                
+                // Add difficulty indicator
+                const difficulty = document.createElement('div');
+                difficulty.className = 'difficulty';
+                
+                const difficultyLevel = Math.min(5, Math.floor(i / 16) + 1);
+                for (let j = 0; j < 5; j++) {
+                    const dot = document.createElement('div');
+                    dot.className = 'diff-dot' + (j < difficultyLevel ? ' filled' : '');
+                    difficulty.appendChild(dot);
+                }
+                
+                button.appendChild(difficulty);
+                
+                button.addEventListener('click', () => {
+                    if (!gamePaused) {
+                        currentLevel = i;
+                        loadLevel(currentLevel);
+                        updateLevelButtons();
+                    }
+                });
+                levelButtonsContainer.appendChild(button);
+            }
+        }
+
+        // Update active level button
+        function updateLevelButtons() {
+            const buttons = document.querySelectorAll('.level-btn');
+            buttons.forEach((btn, index) => {
+                if (index === currentLevel) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+
+        // Load a specific level
+        function loadLevel(levelIndex) {
+            const gameBoard = document.getElementById('game-board');
+            gameBoard.innerHTML = '';
+            
+            const level = levels[levelIndex];
+            moves = 0;
+            seconds = 0;
+            updateTimer();
+            document.getElementById('moves').textContent = moves;
+            document.getElementById('level').textContent = levelIndex + 1;
+            
+            // Hide next level button
+            document.getElementById('next-level-btn').style.display = 'none';
+            
+            // Create tubes
+            level.tubes.forEach((tube, index) => {
+                const tubeElement = document.createElement('div');
+                tubeElement.className = 'tube';
+                if (tube.locked) {
+                    tubeElement.classList.add('locked');
+                }
+                tubeElement.dataset.index = index;
+                
+                // Create liquids
+                for (let i = 0; i < 4; i++) {
+                    const liquid = document.createElement('div');
+                    liquid.className = 'liquid';
+                    liquid.style.height = '25%';
+                    liquid.style.bottom = (i * 25) + '%';
+                    
+                    if (tube[i] !== 'empty') {
+                        liquid.style.backgroundColor = colors[tube[i]];
+                        
+                        // Add top surface for 3D effect
+                        if (i === 3 || (i < 3 && tube[i+1] !== tube[i])) {
+                            const liquidTop = document.createElement('div');
+                            liquidTop.className = 'liquid-top';
+                            liquidTop.style.backgroundColor = colors[tube[i]];
+                            liquidTop.style.bottom = ((i+1) * 25) + '%';
+                            tubeElement.appendChild(liquidTop);
+                        }
+                    } else {
+                        liquid.style.backgroundColor = 'transparent';
+                    }
+                    
+                    tubeElement.appendChild(liquid);
+                }
+                
+                gameBoard.appendChild(tubeElement);
+            });
+            
+            selectedTube = null;
+        }
+
+        // Set up event listeners
+        function setupEventListeners() {
+            // Tube selection
+            document.getElementById('game-board').addEventListener('click', (e) => {
+                if (gamePaused) return;
+                
+                const tubeElement = e.target.closest('.tube');
+                if (!tubeElement || tubeElement.classList.contains('locked')) return;
+                
+                const tubeIndex = parseInt(tubeElement.dataset.index);
+                
+                if (selectedTube === null) {
+                    // Select first tube
+                    if (!isTubeEmpty(levels[currentLevel].tubes[tubeIndex])) {
+                        selectedTube = tubeIndex;
+                        tubeElement.classList.add('selected');
+                    }
+                } else if (selectedTube === tubeIndex) {
+                    // Deselect tube
+                    selectedTube = null;
+                    tubeElement.classList.remove('selected');
+                } else {
+                    // Attempt to pour
+                    if (isValidPour(selectedTube, tubeIndex)) {
+                        pourWater(selectedTube, tubeIndex);
+                        moves++;
+                        document.getElementById('moves').textContent = moves;
+                        
+                        // Check for win condition
+                        if (checkWin()) {
+                            completedLevels.add(currentLevel);
+                            setTimeout(() => {
+                                document.getElementById('final-moves').textContent = moves;
+                                document.getElementById('final-time').textContent = document.getElementById('time').textContent;
+                                document.getElementById('win-modal').style.display = 'flex';
+                                if (currentLevel < levels.length - 1) {
+                                    document.getElementById('next-level-btn').style.display = 'block';
+                                }
+                            }, 500);
+                        }
+                    }
+                    
+                    // Deselect tube
+                    document.querySelector('.tube.selected')?.classList.remove('selected');
+                    selectedTube = null;
+                }
+            });
+            
+            // Pause button
+            document.getElementById('pause-btn').addEventListener('click', () => {
+                gamePaused = true;
+                clearInterval(gameTimer);
+                document.getElementById('pause-modal').style.display = 'flex';
+            });
+            
+            // Resume button
+            document.getElementById('resume-btn').addEventListener('click', () => {
+                gamePaused = false;
+                document.getElementById('pause-modal').style.display = 'none';
+                startTimer();
+            });
+            
+            // Reset button
+            document.getElementById('reset-btn').addEventListener('click', () => {
+                if (!gamePaused) {
+                    loadLevel(currentLevel);
+                }
+            });
+            
+            // Hint button
+            document.getElementById('hint-btn').addEventListener('click', () => {
+                provideHint();
+            });
+            
+            // Next level button
+            document.getElementById('next-level-btn').addEventListener('click', () => {
+                if (currentLevel < levels.length - 1) {
+                    currentLevel++;
+                    loadLevel(currentLevel);
+                    updateLevelButtons();
+                }
+            });
+            
+            // Continue button (from win modal)
+            document.getElementById('continue-btn').addEventListener('click', () => {
+                document.getElementById('win-modal').style.display = 'none';
+            });
+        }
+
+        // Start the game timer
+        function startTimer() {
+            clearInterval(gameTimer);
+            gameTimer = setInterval(() => {
+                if (!gamePaused) {
+                    seconds++;
+                    updateTimer();
+                    
+                    // Check if time limit exceeded
+                    const timeLimit = levels[currentLevel].timeLimit;
+                    if (timeLimit && seconds > timeLimit) {
+                        clearInterval(gameTimer);
+                        alert("Time's up! Try again.");
+                        loadLevel(currentLevel);
+                    }
+                }
+            }, 1000);
+        }
+
+        // Update timer display
+        function updateTimer() {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            document.getElementById('time').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+        }
+
+        // Check if a tube is empty
+        function isTubeEmpty(tube) {
+            return tube.every(color => color === 'empty');
+        }
+
+        // Check if pour is valid
+        function isValidPour(fromIndex, toIndex) {
+            const fromTube = levels[currentLevel].tubes[fromIndex];
+            const toTube = levels[currentLevel].tubes[toIndex];
+            
+            // Check if source tube is empty
+            if (isTubeEmpty(fromTube)) return false;
+            
+            // Check if destination tube is full
+            if (toTube[3] !== 'empty') return false;
+            
+            // Get top color of source tube
+            let fromTopColor = null;
+            let fromTopIndex = -1;
+            for (let i = 3; i >= 0; i--) {
+                if (fromTube[i] !== 'empty') {
+                    fromTopColor = fromTube[i];
+                    fromTopIndex = i;
+                    break;
+                }
+            }
+            
+            // Check if destination tube is empty
+            if (isTubeEmpty(toTube)) return true;
+            
+            // Get top color of destination tube
+            let toTopColor = null;
+            for (let i = 3; i >= 0; i--) {
+                if (toTube[i] !== 'empty') {
+                    toTopColor = toTube[i];
+                    break;
+                }
+            }
+            
+            // Check if colors match
+            return fromTopColor === toTopColor;
+        }
+
+        // Pour water from one tube to another
+        function pourWater(fromIndex, toIndex) {
+            const fromTube = levels[currentLevel].tubes[fromIndex];
+            const toTube = levels[currentLevel].tubes[toIndex];
+            
+            // Get top color of source tube and how many of that color
+            let fromTopColor = null;
+            let fromTopIndex = -1;
+            for (let i = 3; i >= 0; i--) {
+                if (fromTube[i] !== 'empty') {
+                    fromTopColor = fromTube[i];
+                    fromTopIndex = i;
+                    break;
+                }
+            }
+            
+            let colorCount = 1;
+            for (let i = fromTopIndex - 1; i >= 0; i--) {
+                if (fromTube[i] === fromTopColor) {
+                    colorCount++;
+                } else {
+                    break;
+                }
+            }
+            
+            // Find how much empty space in destination tube
+            let emptySpace = 0;
+            for (let i = 0; i < 4; i++) {
+                if (toTube[i] === 'empty') {
+                    emptySpace++;
+                }
+            }
+            
+            // Determine how much to pour
+            const pourAmount = Math.min(colorCount, emptySpace);
+            
+            // Perform the pour in the data model
+            for (let i = 0; i < pourAmount; i++) {
+                // Remove from source
+                for (let j = 0; j < 4; j++) {
+                    if (fromTube[j] !== 'empty') {
+                        fromTube[j] = 'empty';
+                        break;
+                    }
+                }
+                
+                // Add to destination
+                for (let j = 3; j >= 0; j--) {
+                    if (toTube[j] === 'empty') {
+                        toTube[j] = fromTopColor;
+                        break;
+                    }
+                }
+            }
+            
+            // Update the visual representation
+            loadLevel(currentLevel);
+        }
+
+        // Check if the level is complete
+        function checkWin() {
+            return levels[currentLevel].tubes.every(tube => {
+                // Tube is either empty or has all the same color
+                if (isTubeEmpty(tube)) return true;
+                
+                const firstColor = tube.find(color => color !== 'empty');
+                return tube.every(color => color === 'empty' || color === firstColor);
+            });
+        }
+
+        // Provide a hint to the player
+        function provideHint() {
+            // Simple hint system - find a valid move
+            for (let i = 0; i < levels[currentLevel].tubes.length; i++) {
+                if (isTubeEmpty(levels[currentLevel].tubes[i]) || levels[currentLevel].tubes[i].locked) continue;
+                
+                for (let j = 0; j < levels[currentLevel].tubes.length; j++) {
+                    if (i === j) continue;
+                    if (levels[currentLevel].tubes[j].locked) continue;
+                    
+                    if (isValidPour(i, j)) {
+                        // Highlight the source tube
+                        const tubes = document.querySelectorAll('.tube');
+                        tubes[i].classList.add('selected');
+                        setTimeout(() => {
+                            tubes[i].classList.remove('selected');
+                        }, 1000);
+                        return;
+                    }
+                }
+            }
+        }
+
+        // Initialize the game when the page loads
+        window.addEventListener('load', initGame);
+    </script>
+</body>
+</html>
