@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Water Sort Puzzle - Liquid Sorting Game</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo-icon {
+            font-size: 2.5rem;
+            color: #4ecdc4;
+            filter: drop-shadow(0 0 10px rgba(78, 205, 196, 0.7));
+        }
+        
+        .logo h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 25px;
+        }
+        
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            padding: 8px 15px;
+            border-radius: 20px;
+        }
+        
+        nav a:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        .hero {
+            display: flex;
+            align-items: center;
+            gap: 40px;
+            margin: 40px 0;
+        }
+        
+        .hero-content {
+            flex: 1;
+        }
+        
+        .hero h2 {
+            font-size: 3.2rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            max-width: 600px;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(to right, #ff9966, #ff5e62);
+            color: white;
+            padding: 18px 50px;
+            font-size: 1.4rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 35px;
+            cursor: pointer;
+            text-decoration: none;
+            box-shadow: 0 5px 15px rgba(255, 94, 98, 0.4);
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(255, 94, 98, 0.6);
+        }
+        
+        .hero-image {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .tube-container {
+            display: flex;
+            gap: 20px;
+            margin-top: 40px;
+        }
+        
+        .tube {
+            width: 70px;
+            height: 180px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 0 0 30px 30px;
+            position: relative;
+            overflow: hidden;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .liquid {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            border-radius: 0 0 27px 27px;
+            transition: height 0.5s ease;
+        }
+        
+        .liquid-1 { height: 70%; background: linear-gradient(to top, #ff5e62, #ff9966); }
+        .liquid-2 { height: 40%; background: linear-gradient(to top, #36d1dc, #5b86e5); }
+        .liquid-3 { height: 85%; background: linear-gradient(to top, #ad5389, #3c1053); }
+        .liquid-4 { height: 60%; background: linear-gradient(to top, #1d976c, #93f9b9); }
+        .liquid-5 { height: 30%; background: linear-gradient(to top, #ffd26f, #ff7bb3); }
+        
+        .features {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            margin: 60px 0;
+            text-align: center;
+        }
+        
+        .features h2 {
+            font-size: 2.5rem;
+            margin-bottom: 40px;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        .feature {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 25px;
+            border-radius: 15px;
+            transition: transform 0.3s ease;
+        }
+        
+        .feature:hover {
+            transform: translateY(-5px);
+        }
+        
+        .feature i {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: #4ecdc4;
+        }
+        
+        .feature h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+        
+        .levels-preview {
+            text-align: center;
+            margin: 60px 0;
+        }
+        
+        .levels-preview h2 {
+            font-size: 2.5rem;
+            margin-bottom: 40px;
+        }
+        
+        .level-cards {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .level-card {
+            background: rgba(255, 255, 255, 0.1);
+            width: 150px;
+            height: 150px;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .level-card:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(1.05);
+        }
+        
+        .level-card i {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        /* Ad Units */
+        .ad-unit {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .ad-label {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 8px;
+        }
+        
+        .ad-content {
+            background: linear-gradient(135deg, #2c3e50, #4a6491);
+            border-radius: 8px;
+            height: 90px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .ad-content.wide {
+            height: 120px;
+        }
+        
+        .ad-content i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: #4ecdc4;
+        }
+        
+        .ad-text {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .ad-button {
+            display: inline-block;
+            background: #4ecdc4;
+            color: white;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-top: 8px;
+            cursor: pointer;
+        }
+        
+        footer {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 30px 0;
+            text-align: center;
+            margin-top: auto;
+        }
+        
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .social-links a {
+            color: #fff;
+            font-size: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .social-links a:hover {
+            transform: translateY(-5px);
+        }
+        
+        @media (max-width: 768px) {
+            .hero {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .hero p {
+                max-width: 100%;
+            }
+            
+            .tube-container {
+                justify-content: center;
+            }
+            
+            nav ul {
+                gap: 10px;
+            }
+            
+            nav a {
+                font-size: 0.9rem;
+                padding: 5px 10px;
+            }
+            
+            .ad-unit {
+                margin: 20px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Top Ad Banner -->
+        <div class="ad-unit">
+            <div class="ad-label">Advertisement</div>
+            <div class="ad-content wide">
+                <i class="fas fa-ad"></i>
+                <div class="ad-text">Game of the Month - Download Now!</div>
+                <div class="ad-button">Learn More</div>
+            </div>
+        </div>
+        
+        <header>
+            <div class="logo">
+                <i class="fas fa-flask logo-icon"></i>
+                <h1>Water Sort Puzzle</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#">Home</a></li>
+                    <li><a href="#">Levels</a></li>
+                    <li><a href="#">How to Play</a></li>
+                    <li><a href="#">About</a></li>
+                </ul>
+            </nav>
+        </header>
+        
+        <section class="hero">
+            <div class="hero-content">
+                <h2>Sort the Colors, Solve the Puzzle!</h2>
+                <p>Challenge your brain with 80 unique levels of liquid sorting fun. Pour wisely to separate all colors into their own tubes!</p>
+                <a href="#" class="cta-button">Start Game <i class="fas fa-play"></i></a>
+            </div>
+            <div class="hero-image">
+                <div class="tube-container">
+                    <div class="tube">
+                        <div class="liquid liquid-1"></div>
+                    </div>
+                    <div class="tube">
+                        <div class="liquid liquid-2"></div>
+                    </div>
+                    <div class="tube">
+                        <div class="liquid liquid-3"></div>
+                    </div>
+                    <div class="tube">
+                        <div class="liquid liquid-4"></div>
+                    </div>
+                    <div class="tube">
+                        <div class="liquid liquid-5"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Middle Ad Banner -->
+        <div class="ad-unit">
+            <div class="ad-label">Sponsored</div>
+            <div class="ad-content">
+                <i class="fas fa-gamepad"></i>
+                <div class="ad-text">New Puzzle Games Collection</div>
+                <div class="ad-button">Discover</div>
+            </div>
+        </div>
+        
+        <section class="features">
+            <h2>Game Features</h2>
+            <div class="feature-grid">
+                <div class="feature">
+                    <i class="fas fa-tint"></i>
+                    <h3>80 Challenging Levels</h3>
+                    <p>From beginner to expert, progressively challenging puzzles</p>
+                </div>
+                
+                <!-- Ad in features section -->
+                <div class="feature" style="background: linear-gradient(135deg, #3a7bd5, #00d2ff); cursor: pointer;">
+                    <i class="fas fa-gift"></i>
+                    <h3>Special Offer!</h3>
+                    <p>Remove ads and unlock bonus levels with our premium version</p>
+                    <div class="ad-button" style="margin-top: 15px;">Upgrade Now</div>
+                </div>
+                
+                <div class="feature">
+                    <i class="fas fa-brain"></i>
+                    <h3>Brain Training</h3>
+                    <p>Improve your problem-solving and logical thinking skills</p>
+                </div>
+            </div>
+        </section>
+        
+        <section class="levels-preview">
+            <h2>Level Progression</h2>
+            <div class="level-cards">
+                <div class="level-card">
+                    <i class="fas fa-seedling"></i>
+                    <p>Beginner</p>
+                </div>
+                <div class="level-card">
+                    <i class="fas fa-mountain"></i>
+                    <p>Intermediate</p>
+                </div>
+                <div class="level-card">
+                    <i class="fas fa-rocket"></i>
+                    <p>Advanced</p>
+                </div>
+                <div class="level-card">
+                    <i class="fas fa-crown"></i>
+                    <p>Expert</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Bottom Ad Banner -->
+        <div class="ad-unit">
+            <div class="ad-label">Advertisement</div>
+            <div class="ad-content wide">
+                <i class="fas fa-download"></i>
+                <div class="ad-text">Download our mobile app for better experience!</div>
+                <div class="ad-button">Get App</div>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <div class="social-links">
+            <a href="#"><i class="fab fa-facebook"></i></a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
+        </div>
+        <p>&copy; 2023 Water Sort Puzzle. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Simple animation for the liquid in tubes
+        document.addEventListener('DOMContentLoaded', function() {
+            const liquids = document.querySelectorAll('.liquid');
+            
+            function animateLiquids() {
+                liquids.forEach(liquid => {
+                    const randomHeight = Math.floor(Math.random() * 80) + 10;
+                    liquid.style.height = randomHeight + '%';
+                });
+            }
+            
+            // Animate every 3 seconds
+            setInterval(animateLiquids, 3000);
+            
+            // Initial animation with delay for each tube
+            setTimeout(animateLiquids, 100);
+            
+            // Make the Start Game button more prominent with animation
+            const ctaButton = document.querySelector('.cta-button');
+            
+            setInterval(() => {
+                ctaButton.style.transform = 'scale(1.05)';
+                setTimeout(() => {
+                    ctaButton.style.transform = 'scale(1)';
+                }, 500);
+            }, 2000);
+        });
+    </script>
+</body>
+</html>
